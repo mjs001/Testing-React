@@ -3,16 +3,35 @@
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 import React from "react";
-import "@testing-library/jest-dom/extend-expect";
-import { render, fireEvent, wait } from "@testing-library/react";
+import { render, fireEvent, wait, cleanup } from "@testing-library/react";
+import { getData as mockGetData } from "../api";
 import StarWarsCharacters from "./StarWarsCharacters";
-test("checks to see if buttons are rendering", () => {
-  const { getByText, getByLabelText } = render(<StarWarsCharacters />);
-  fireEvent.click(getByText(/previous/i));
-  fireEvent.click(getByText(/next/i));
+
+test("Renders the previous and next buttons", () => {
+  const { getByText } = render(<StarWarsCharacters />);
+  const previousButton = getByText(/Previous/i);
+  const nextButton = getByText(/Next/i);
+
+  fireEvent.click(previousButton);
+  fireEvent.click(nextButton);
 });
-test("checks to see if the previous button can be clicked", () => {
-  const { queryByText } = render(<StarWarsCharacters />);
-  const PreviousButton = queryByText(/previous/i);
-  fireEvent.click(PreviousButton);
+jest.mock("../api");
+
+const fakeData = {
+  next: "https://swapi.co/api/people/?page=2",
+  previous: null,
+  results: [
+    { name: "person1", url: "1url" },
+    { name: "person2", url: "2url" }
+  ]
+};
+
+mockGetData.mockResolvedValue(fakeData);
+test("api works", async () => {
+  const { getByText } = render(<StarWarsCharacters />);
+
+  await wait(() => expect(getByText(/person1/i)));
+  getByText(/person1/i);
+
+  expect(mockGetData).toHaveBeenCalledWith("https://swapi.co/api/people");
 });
