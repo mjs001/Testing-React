@@ -11,3 +11,8 @@ test("checks to see if buttons are rendering", () => {
   fireEvent.click(getByText(/previous/i));
   fireEvent.click(getByText(/next/i));
 });
+test("checks to see if the previous button can be clicked", () => {
+  const { queryByText } = render(<StarWarsCharacters />);
+  const PreviousButton = queryByText(/previous/i);
+  fireEvent.click(PreviousButton);
+});
